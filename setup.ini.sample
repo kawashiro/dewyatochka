@@ -1,0 +1,35 @@
+# Jabber login
+USERNAME=login
+
+# Nickname in the chat
+NICK=Nickname
+
+# Password to your jabber-account
+PASSWORD=password
+
+# Your jabber-server
+SERVER=your-jabber-server.net
+
+# Your jabber-server port
+PORT=5222
+
+# Room to shit
+ROOM=room@conference.jabber.server.net
+
+# Bots owners nickname
+OWNER=Nickname
+
+# Users who have access to the console, not necessary
+ADMIN=Nickname
+ADMIN2=Nickname2
+ADMIN3=Nickname3
+
+# Doge :3
+DOGE=doge
+
+# Max doge messages at once, defaultis 3
+DOGE_THRESHOSLD=3
+
+# Path to AniDB xml-file
+ANIDB_XML=anime-titles.xml
+
