@@ -34,6 +34,7 @@ use LWP::Simple;
 use XML::Parser;
 #use Data::Dumper;
 use URI::Escape;
+use Digest::MD5 qw(md5);
 
 #This is the filename that contains the setup information
 my $ConfigFile = "setup.ini";
@@ -121,6 +122,11 @@ my $consoleCommandCnt = 0;
 my $consoleSuccessCnt = 0;
 my $consoleErrorCnt = 0;
 
+# Console commands handlers:
+my %consoleHandlers = (
+	'login' => \&Auth,
+);
+my @adminSessions = ();
 
 ############################################################
 ############  XML parser callbacks follow here  ############
@@ -286,8 +292,7 @@ sub LoginScript
 	                                  tls => 1);
 
 	if ( !(defined($status)) || !($status) ) {
-		print "ERROR: jabber server is down or connection was not allowed.\n";
-		print "       ($!)\n";
+		print "ERROR: jabber server is down or connection was not allowed. ($!)\n";
 		exit(0);
 	}
 
@@ -669,7 +674,41 @@ sub CheckForConsoleCommand
 		&say('You are not in administrators list');
 		return 0;
 	}
-	&say('I\'m in private, ' . $TheUser);
-	return 1;
+	my ($command, @args) = &ParseConsoleCommand();
+	return defined($command) && defined($consoleHandlers{$command}) ? $consoleHandlers{$command}(@args) : 0;
 }
 
+
+########################################################################
+#
+#  Parse console command to params array private console
+#  usage: &ParseConsoleCommand;
+#
+########################################################################
+sub ParseConsoleCommand
+{
+	if (!$TheMess) {
+		return (undef, ());
+	}
+	my @parts = split(' ', $TheMess);
+	return (shift @parts, @parts);
+}
+
+########################################################################
+#
+#  Authorisation handler
+#  usage: &ParseConsoleCommand;
+#
+########################################################################
+sub Auth
+{
+	my $credentials = $TheUser . '::' . md5(join(' ', @_));
+	foreach my $admin (@administrators) {
+		if ($admin eq $credentials) {
+			push(@adminSessions, $credentials);
+			&say(join(',', @adminSessions));
+			return 1;
+		}
+	}
+	return 0;
+}

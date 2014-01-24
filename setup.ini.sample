@@ -19,10 +19,10 @@ ROOM=room@conference.jabber.server.net
 # Bots owners nickname
 OWNER=Nickname
 
-# Users who have access to the console, not necessary
-ADMIN=Nickname
-ADMIN2=Nickname2
-ADMIN3=Nickname3
+# Users who have access to the console, not necessary. Provide password in md5 after "::"
+ADMIN=Nickname::76d80224611fc919a5d54f0ff9fba446
+ADMIN2=Nickname2::76d80224611fc919a5d54f0ff9fba446
+ADMIN3=Nickname3::76d80224611fc919a5d54f0ff9fba446
 
 # Doge :3
 DOGE=doge
