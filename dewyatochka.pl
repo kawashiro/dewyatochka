@@ -34,6 +34,7 @@ use LWP::Simple;
 use XML::Parser;
 #use Data::Dumper;
 use URI::Escape;
+use HTML::Entities;
 
 #This is the filename that contains the setup information
 my $ConfigFile = "setup.ini";
@@ -420,6 +421,7 @@ sub SendHelp
 	$message .= "!coolstory - Рассказать охуительную историю\n";
 	$message .= "!cartoon - Посоветовать мультик (пока только всякое окаменелое говно мамонта)\n" if (%titles);
 	$message .= "!hentai (*tags) - Фап-фап-фап\n";
+	$message .= "!azaza - Рассказать отличную искромётную шутку\n";
 	$message .= "!owner - Рассказать, с кем я больше всего люблю заниматься сексом ^///^";
 	&say($message);
 }
@@ -607,6 +609,30 @@ sub WhoOwnsMe
 
 ########################################################################
 #
+#  Tell a very funny joke
+#  usage: &CoolJoke;
+#
+########################################################################
+sub CoolJoke
+{
+	my $html = get 'http://nya.sh/';
+	my $last = $html =~ s/.*<div align="center" class="pages">Страницы: <b>//sr =~ s/<\/b>.*//rs;
+	my @pages = ();
+	for (my $i = 0; $i <= $last; $i++) {
+		push(@pages, $i * 50);
+	}
+	my $page = @pages[rand keys @pages];
+	if ($page > 0) {
+		$html = get "http://nya.sh/page/$page";
+	}
+	my @jokes = $html =~ m/<div class="content">.*?<\/div>/gi;
+	my $joke = @jokes[rand keys @jokes] =~ s/<br\s+\/?>/\R/rgi =~ s/<[^>]*>//rg;
+	&say(decode_entities($joke));
+}
+
+
+########################################################################
+#
 #  Check For Command - Checks if a bot command has been given
 #  It assumes that the command is in $TheMess
 #  If there was a command at all.
@@ -645,6 +671,9 @@ sub CheckForCommand
 	} elsif ($messageLower =~ m/^!hentai\s*/) {
 		my $tag = $messageLower =~ s/^\!hentai\s+//ir;
 		&Hentai($tag);
+
+	} elsif ($messageLower =~ m/^!azaza\s*/) {
+		&CoolJoke;
 
 #	} elsif ($messageLower eq '!loli') {
 #		#FIXME: Doesn't work at all
