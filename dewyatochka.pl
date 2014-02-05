@@ -180,8 +180,10 @@ sub EndElement
 	my($parser, $_element) = @_;
 	if ($_element eq 'anime') {
 		print "\rLoading anime title #" . $currentTitleId . " ... ";
-		$titles{$currentTitleId} = $currentTitleTitle;
 		$currentTitleScore = 0;
+		if ($currentTitleId >= 6000) { # TODO: Remove this crappy hack or migrate to a normal API
+			$titles{$currentTitleId} = $currentTitleTitle;
+		}
 	}
 }
 ############################################################
@@ -419,7 +421,7 @@ sub SendHelp
 	$message .= "!help - Мануал для дебилов\n";
 	$message .= "!tits - Показать сисечки ^-^\n";
 	$message .= "!coolstory - Рассказать охуительную историю\n";
-	$message .= "!cartoon - Посоветовать мультик (пока только всякое окаменелое говно мамонта)\n" if (%titles);
+	$message .= "!cartoon - Посоветовать мультик\n" if (%titles);
 	$message .= "!hentai (*tags) - Фап-фап-фап\n";
 	$message .= "!azaza - Рассказать отличную искромётную шутку\n";
 	$message .= "!owner - Рассказать, с кем я больше всего люблю заниматься сексом ^///^";
