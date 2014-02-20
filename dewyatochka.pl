@@ -107,6 +107,8 @@ my $Connection = undef;
 my $DogCounter = 0;
 # Anime titles
 my %titles = ();
+# Cool stories
+my @coolStories = ();
 # Global crap for XML-parser
 my $currentTitleId = 0;
 my $currentTitleTitle = '';
@@ -533,9 +535,21 @@ sub Doge
 ########################################################################
 sub CoolStory
 {
-	my $html = get 'http://zadolba.li/random/';
-	my $text = $html =~ s/\R//rg =~ s/^.*id="story_\d+">//r =~ s/<\/p>.*$//r =~ s/(<br\s*\/?>)+/\n/rg =~ s/<[^>]*>//rg;
-	&say($text);
+	if (!@coolStories) {
+		my $html = get 'http://zadolba.li/random/';
+		my @storiesRaw = $html =~ m/<div\ class=\'text\'>(.*?)<\/div>/sgi;
+		if (!@storiesRaw) {
+			&say('Что-то снова пошло не так... :(');
+			return;
+		}
+		foreach my $storyRaw (@storiesRaw) {
+			my $story = $storyRaw =~ s/((<br\s*\/?>)|(<\/p><p>))+/\n/rg =~ s/^\R*//srg =~ s/<[^>]*>//rg;
+			chomp($story);
+			push(@coolStories, $story);
+		}
+	}
+	my $message = shift @coolStories;
+	&say($message);
 }
 
 
