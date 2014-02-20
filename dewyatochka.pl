@@ -545,7 +545,7 @@ sub CoolStory
 		foreach my $storyRaw (@storiesRaw) {
 			my $story = $storyRaw =~ s/((<br\s*\/?>)|(<\/p><p>))+/\n/rg =~ s/^\R*//srg =~ s/<[^>]*>//rg;
 			chomp($story);
-			push(@coolStories, $story);
+			push(@coolStories, decode_entities($story));
 		}
 	}
 	my $message = shift @coolStories;
@@ -605,7 +605,7 @@ sub Hentai
 		my @hrefs = $comic =~ m/http\:\/\/g\.e\-hentai\.org\/g\/\d+?\/.+?\//gi;
 		my $href = $hrefs[0];
 		my $title = $comic =~ s/^.*\<div\ class=\"it5\"\>//r =~ s/\<\/div\>.*$//r =~ s/\<[^>]*\>//gr;
-		$message = $title . ' (' . $href . ')';
+		$message = decode_entities($title) . ' (' . $href . ')';
 	}
 	&say($message);
 }
