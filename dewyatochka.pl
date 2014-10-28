@@ -32,9 +32,10 @@ use Net::Jabber;
 # include other modules needed
 use LWP::Simple;
 use XML::Parser;
-#use Data::Dumper;
 use URI::Escape;
 use HTML::Entities;
+use JSON;
+use Data::Dumper;
 
 #This is the filename that contains the setup information
 my $ConfigFile = "setup.ini";
@@ -109,6 +110,8 @@ my $DogCounter = 0;
 my %titles = ();
 # Cool stories
 my @coolStories = ();
+# mail.ru questions
+my @questions = ();
 # Global crap for XML-parser
 my $currentTitleId = 0;
 my $currentTitleTitle = '';
@@ -215,9 +218,10 @@ sub LoadTitles
 #################################################
 
 &LoadTitles;
-&LoginScript;
-&ConnectedLoop;
-&Stop;
+if (&LoginScript) {
+	&ConnectedLoop;
+	&Stop;
+}
 
 #################################################
 ########### End of main program  ################
@@ -229,6 +233,7 @@ sub LoadTitles
 #  Connected Loop - This is the loop that waits for a start command
 #                   from a user
 #  usage: &ConnectedLoop;
+#  TODO: Move time-related settings to the config
 #
 ########################################################################
 sub ConnectedLoop
@@ -238,8 +243,8 @@ sub ConnectedLoop
 		#wait for an input and react if it should
 		$TheMess = "";
 		$TheUser = "";
-		my $success = $Connection->Process();
-		if (defined($success)) {
+		my $success = $Connection->Process(60);
+		if ($success) {
 			$recievedCnt++;
 			if ($mode eq 'chat') {
 				$processedCnt += &CheckForCommand;
@@ -249,8 +254,14 @@ sub ConnectedLoop
 				$consoleSuccessCnt += &CheckForConsoleCommand;
 				$consoleErrorCnt = $consoleCommandCnt - $consoleSuccessCnt;
 			}
+		} elsif (defined($success)) {
+			# Action on idle
+			if ($lastinput < time - 300) {
+				&MrQuestion;
+			}
 		} else {
 			print "\nConnection died, trying to reconnect...\n";
+			sleep(5);
 			&LoginScript;
 		}
 	}
@@ -293,7 +304,7 @@ sub LoginScript
 	if ( !(defined($status)) || !($status) ) {
 		print "ERROR: jabber server is down or connection was not allowed.\n";
 		print "       ($!)\n";
-		exit(0);
+		return 0;
 	}
 
 	#Log In
@@ -302,7 +313,7 @@ sub LoginScript
 	                                   resource => $resource);
 	if ($result[0] ne "ok") {
 		print "ERROR: Authorization failed: $result[0] - $result[1]\n";
-		exit(0);
+		return 0;
 	}
 
 	#Get the roster to let everyone know it's on!
@@ -315,6 +326,7 @@ sub LoginScript
 	                          to => $setup{ROOM} . "/" . $setup{NICK});
 	#We are now logged in and in the room
 	print "Done!\n";
+	return 1;
 }
 
 ########################################################################
@@ -570,6 +582,28 @@ sub Cartoon
 	}
 }
 
+########################################################################
+#
+#  Ask a cool question from otvet.mail.ru
+#  usage: &MrQuestion
+#
+########################################################################
+sub MrQuestion
+{
+	if (!@questions) {
+		# TODO: Move questions category to the config
+		my $json = get 'http://otvet.mail.ru/api/v2/questlist?n=100&state=A&cat=adult';
+		my @question_refs = @{${decode_json $json}{qst}};
+		foreach my $question_ref (@question_refs) {
+			push(@questions, ${$question_ref}{qtext});
+		}
+	}
+
+	if (@questions) {
+		&say(shift @questions);
+	}
+}
+
 
 ########################################################################
 #
@@ -684,6 +718,9 @@ sub CheckForCommand
 	} elsif ($messageLower eq '!owner') {
 		&WhoOwnsMe;
 
+	} elsif ($messageLower eq '!talk') {
+		&MrQuestion;
+
 	} elsif ($messageLower =~ m/^!hentai\s*/) {
 		my $tag = $messageLower =~ s/^\!hentai\s+//ir;
 		&Hentai($tag);
@@ -717,4 +754,3 @@ sub CheckForConsoleCommand
 	&say('I\'m in private, ' . $TheUser);
 	return 1;
 }
-
