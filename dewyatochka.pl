@@ -35,7 +35,7 @@ use XML::Parser;
 use URI::Escape;
 use HTML::Entities;
 use JSON;
-use Data::Dumper;
+#use Data::Dumper;
 
 #This is the filename that contains the setup information
 my $ConfigFile = "setup.ini";
@@ -256,8 +256,9 @@ sub ConnectedLoop
 			}
 		} elsif (defined($success)) {
 			# Action on idle
-			if ($lastinput < time - 300) {
+			if ($lastinput < time - 600) {
 				&MrQuestion;
+				$last_input = time;
 			}
 		} else {
 			print "\nConnection died, trying to reconnect...\n";
@@ -438,6 +439,7 @@ sub SendHelp
 	$message .= "!cartoon - Посоветовать мультик\n" if (%titles);
 	$message .= "!hentai (*tags) - Фап-фап-фап\n";
 	$message .= "!azaza - Рассказать отличную искромётную шутку\n";
+	$message .= "!talk - Пообщаться с тохозадротом на откровенные темы\n";
 	$message .= "!owner - Рассказать, с кем я больше всего люблю заниматься сексом ^///^";
 	&say($message);
 }
