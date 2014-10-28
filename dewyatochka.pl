@@ -258,7 +258,7 @@ sub ConnectedLoop
 			# Action on idle
 			if ($lastinput < time - 600) {
 				&MrQuestion;
-				$last_input = time;
+				$lastinput = time;
 			}
 		} else {
 			print "\nConnection died, trying to reconnect...\n";
