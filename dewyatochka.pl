@@ -256,14 +256,15 @@ sub ConnectedLoop
 			}
 		} elsif (defined($success)) {
 			# Action on idle
-			if ($lastinput < time - 600) {
+			if ($lastinput < time - 10800) {
 				&MrQuestion;
 				$lastinput = time;
 			}
 		} else {
-			print "\nConnection died, trying to reconnect...\n";
-			sleep(5);
-			&LoginScript;
+			do {
+				print "\nConnection died, trying to reconnect...\n";
+				sleep(5);
+			} while (!&LoginScript)
 		}
 	}
 }
