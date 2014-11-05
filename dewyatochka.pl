@@ -304,8 +304,7 @@ sub LoginScript
 	                                  tls => 1);
 
 	if ( !(defined($status)) || !($status) ) {
-		print "ERROR: jabber server is down or connection was not allowed.\n";
-		print "       ($!)\n";
+		print "ERROR: $!\n";
 		return 0;
 	}
 
