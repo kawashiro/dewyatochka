@@ -30,6 +30,8 @@ if ($^O =~ m/^mswin/i) {
 # include the Jabber stuff
 use Net::Jabber;
 # include other modules needed
+use Cwd 'abs_path';
+use File::Basename;
 use LWP::Simple;
 use XML::Parser;
 use URI::Escape;
@@ -39,7 +41,7 @@ use JSON;
 use Digest::MD5 qw(md5);
 
 #This is the filename that contains the setup information
-my $ConfigFile = "setup.ini";
+my $ConfigFile = dirname(abs_path($0)) . "/setup.ini";
 
 if ($#ARGV >= 0) {
 	$ConfigFile = join(" ", @ARGV);
